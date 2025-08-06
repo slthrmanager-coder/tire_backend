@@ -15,10 +15,12 @@ import org.springframework.stereotype.Service;
 
 import com.example.tire_management.model.TireRequest;
 import com.example.tire_management.repository.TireRequestRepository;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
+// Using iText 7 API
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.kernel.geom.PageSize;
 
 @Service
 public class TireRequestService {
@@ -104,9 +106,9 @@ public class TireRequestService {
         TireRequest request = requestOpt.get();
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            Document document = new Document();
-            PdfWriter.getInstance(document, baos);
-            document.open();
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf, PageSize.A4);
 
             document.add(new Paragraph("Tire Request Report"));
             document.add(new Paragraph("ID: " + request.getId()));
@@ -144,7 +146,7 @@ public class TireRequestService {
 
             document.close();
             return baos.toByteArray();
-        } catch (DocumentException e) {
+        } catch (Exception e) {
             throw new IOException("Error generating PDF", e);
         }
     }
